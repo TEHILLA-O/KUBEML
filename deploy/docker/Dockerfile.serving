@@ -1,0 +1,15 @@
+FROM python:3.12.8-slim
+WORKDIR /app
+COPY pyproject.toml README.md ./
+COPY src ./src
+RUN pip install --no-cache-dir . \
+    && python -m kubeml.training \
+    && mkdir -p /opt/kubeml \
+    && python -c "import shutil; from pathlib import Path; src=next(Path('data/artifacts').glob('*.json')); shutil.copy(src, '/opt/kubeml/model.json')" \
+    && useradd --uid 10001 --create-home kubeml \
+    && chown -R kubeml /opt/kubeml
+USER 10001
+ENV KUBEML_MODEL_PATH=/opt/kubeml/model.json
+ENV KUBEML_DATA_DIR=/tmp
+EXPOSE 8090
+CMD ["kubeml-serving"]

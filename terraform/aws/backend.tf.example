@@ -1,0 +1,12 @@
+# Copy to backend.tf only for a shared environment.
+# Do not commit a populated backend file or any state.
+#
+# terraform {
+#   backend "s3" {
+#     bucket         = "REPLACE_ME"
+#     key            = "kubeml/terraform.tfstate"
+#     region         = "us-east-1"
+#     dynamodb_table = "kubeml-tf-locks"
+#     encrypt        = true
+#   }
+# }

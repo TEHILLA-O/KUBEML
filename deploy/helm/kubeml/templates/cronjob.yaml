@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: kubeml-retrain
+  namespace: {{ .Values.namespace }}
+spec:
+  schedule: "0 3 * * 1"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: train
+              image: {{ include "kubeml.image" .Values.platform | quote }}
+              command: ["python", "-c", "import json,os,urllib.request; body=json.dumps({'reason':'scheduled','trigger':'schedule','runtime':'local-thread'}).encode(); req=urllib.request.Request('http://kubeml-platform:8080/api/v1/training/jobs', data=body, headers={'Content-Type':'application/json','Authorization':'Bearer '+os.environ['KUBEML_SERVICE_TOKEN']}); print(urllib.request.urlopen(req).read().decode())"]
+              env:
+                - name: KUBEML_SERVICE_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: kubeml-scheduler
+                      key: token
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  cpu: "1"
+                  memory: 768Mi
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001

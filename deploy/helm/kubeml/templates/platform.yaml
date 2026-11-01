@@ -1,0 +1,91 @@
+{{- if eq .Values.environment "production" }}
+{{- $_ := required "platform.digest is required in production" .Values.platform.digest }}
+{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubeml-platform
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.platform.replicas }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: kubeml-platform
+  template:
+    metadata:
+      labels:
+        app: kubeml-platform
+    spec:
+      serviceAccountName: kubeml-platform
+      terminationGracePeriodSeconds: 20
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+      containers:
+        - name: platform
+          image: {{ include "kubeml.image" .Values.platform | quote }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: KUBEML_DATA_DIR
+              value: /data
+            - name: KUBEML_JWT_SECRET
+              value: {{ .Values.jwtSecret | quote }}
+            - name: KUBEML_ALERT_TOKEN
+              value: {{ .Values.alertToken | quote }}
+            - name: KUBEML_ENVIRONMENT
+              value: {{ .Values.environment | quote }}
+            - name: KUBEML_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: kubeml-scheduler
+                  key: token
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8080
+            periodSeconds: 20
+          startupProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8080
+            failureThreshold: 30
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 768Mi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubeml-platform
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: kubeml-platform
+  ports:
+    - port: 8080
+      targetPort: 8080

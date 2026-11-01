@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install -e ".[dev]"
+      - run: python -m ruff check src tests
+      - run: python -m ruff format --check src tests
+      - run: python -m pytest
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - run: npm run typecheck
+        working-directory: frontend
+      - run: npm test
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
+
+  images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f deploy/docker/Dockerfile.serving -t kubeml-serving:ci .
+      - run: docker build -f deploy/docker/Dockerfile.platform -t kubeml-platform:ci .
+
+  charts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+      - run: helm lint deploy/helm/kubeml
+      - run: helm template kubeml deploy/helm/kubeml > /tmp/kubeml.yaml
+      - run: helm template kubeml deploy/helm/kubeml -f deploy/helm/kubeml/values-production.yaml > /tmp/prod.yaml && exit 1 || echo "production template correctly requires digests"
+
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform fmt -check
+        working-directory: terraform/aws
+      - run: terraform init -backend=false
+        working-directory: terraform/aws
+      - run: terraform validate
+        working-directory: terraform/aws
+
+  kind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+      - uses: helm/kind-action@v1.12.0
+        with:
+          cluster_name: kubeml
+      - run: docker build -f deploy/docker/Dockerfile.serving -t kubeml-serving:dev .
+      - run: docker build -f deploy/docker/Dockerfile.platform -t kubeml-platform:dev .
+      - run: kind load docker-image kubeml-serving:dev --name kubeml
+      - run: kind load docker-image kubeml-platform:dev --name kubeml
+      - run: helm upgrade --install kubeml deploy/helm/kubeml --wait --timeout 10m
+      - run: kubectl wait --for=condition=ready pod -l app=kubeml-serving -n kubeml --timeout=300s
+      - run: kubectl delete job smoke -n kubeml --ignore-not-found
+      - run: kubectl apply -f deploy/k8s/smoke-job.yaml
+      - run: kubectl wait --for=condition=complete job/smoke -n kubeml --timeout=180s

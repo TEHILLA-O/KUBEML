@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.namespace }}
+  labels:
+    app.kubernetes.io/name: kubeml
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kubeml-scheduler
+  namespace: {{ .Values.namespace }}
+type: Opaque
+stringData:
+  token: {{ .Values.serviceToken | default "local-scheduler-token" | quote }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kubeml-platform
+  namespace: {{ .Values.namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: kubeml-platform
+  namespace: {{ .Values.namespace }}
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "services", "events", "configmaps"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list", "watch", "patch", "update"]
+  - apiGroups: ["batch"]
+    resources: ["jobs", "cronjobs"]
+    verbs: ["get", "list", "watch", "create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kubeml-platform
+  namespace: {{ .Values.namespace }}
+subjects:
+  - kind: ServiceAccount
+    name: kubeml-platform
+    namespace: {{ .Values.namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kubeml-platform

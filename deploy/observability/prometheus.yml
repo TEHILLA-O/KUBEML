@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 15s
+scrape_configs:
+  - job_name: kubeml-platform
+    static_configs:
+      - targets: ["platform:8080"]
+  - job_name: kubeml-serving
+    static_configs:
+      - targets: ["serving:8090"]
+rule_files:
+  - /etc/prometheus/alerts.yml
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]

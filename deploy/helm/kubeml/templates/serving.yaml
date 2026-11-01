@@ -1,0 +1,96 @@
+{{- if eq .Values.environment "production" }}
+{{- $_ := required "serving.digest is required in production" .Values.serving.digest }}
+{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubeml-serving
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.serving.replicas }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: kubeml-serving
+  template:
+    metadata:
+      labels:
+        app: kubeml-serving
+    spec:
+      terminationGracePeriodSeconds: 20
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+      containers:
+        - name: serving
+          image: {{ include "kubeml.image" .Values.serving | quote }}
+          ports:
+            - containerPort: 8090
+          env:
+            - name: KUBEML_MODEL_PATH
+              value: /opt/kubeml/model.json
+            - name: KUBEML_SLOT
+              value: stable
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8090
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8090
+          startupProbe:
+            httpGet:
+              path: /health/ready
+              port: 8090
+            failureThreshold: 18
+            periodSeconds: 5
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "sleep 5"]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubeml-serving
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: kubeml-serving
+  ports:
+    - port: 8090
+      targetPort: 8090
+{{- if .Values.metricsServer }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: kubeml-serving
+  namespace: {{ .Values.namespace }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: kubeml-serving
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+{{- end }}

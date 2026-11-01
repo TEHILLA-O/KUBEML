@@ -1,0 +1,6 @@
+FROM python:3.12.8-slim
+WORKDIR /opt/mlflow
+RUN pip install --no-cache-dir mlflow==2.19.0 psycopg2-binary==2.9.10 boto3==1.35.99 \
+    && useradd --uid 10001 --create-home kubeml
+USER 10001
+EXPOSE 5000

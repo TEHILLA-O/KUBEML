@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: smoke
+  namespace: kubeml
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: smoke
+          image: curlimages/curl:8.12.1
+          command: ["curl", "-fsS", "http://kubeml-serving:8090/health/ready"]

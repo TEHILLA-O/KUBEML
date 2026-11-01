@@ -1,0 +1,20 @@
+environment: local
+namespace: kubeml
+platform:
+  repository: kubeml-platform
+  tag: dev
+  digest: ""
+  replicas: 1
+serving:
+  repository: kubeml-serving
+  tag: dev
+  digest: ""
+  replicas: 1
+console:
+  repository: kubeml-console
+  tag: dev
+  digest: ""
+  replicas: 1
+metricsServer: false
+jwtSecret: local-cluster-only
+alertToken: local-alert-token

@@ -1,0 +1,14 @@
+environment: production
+metricsServer: true
+platform:
+  repository: example.invalid/kubeml-platform
+  tag: ""
+  digest: ""
+serving:
+  repository: example.invalid/kubeml-serving
+  tag: ""
+  digest: ""
+console:
+  repository: example.invalid/kubeml-console
+  tag: ""
+  digest: ""
