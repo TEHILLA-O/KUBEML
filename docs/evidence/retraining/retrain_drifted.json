@@ -1,0 +1,205 @@
+{
+  "generated_at": "2026-11-24T15:27:43+00:00",
+  "batch": {
+    "scenario": "drifted",
+    "rows": 2000,
+    "seed": 101,
+    "window_rows": 1000,
+    "holdout_rows": 1000,
+    "fingerprint": "c25014bdf8e824c9569998c041a8c45e63ad737ad0c5834bcde0d16f8cd827e6"
+  },
+  "policy": {
+    "min_drifted_features": 2,
+    "max_auc_drop": 0.03,
+    "window_share": 0.5
+  },
+  "drift": {
+    "result": "drift",
+    "drifted_features": [
+      "annual_income",
+      "debt_ratio",
+      "delinquencies_2y",
+      "housing"
+    ],
+    "per_feature": {
+      "age": {
+        "result": "stable",
+        "psi": 0.016042387666428563,
+        "ks_statistic": 0.03692857142857143,
+        "ks_pvalue": 0.2605864606758182,
+        "js_divergence": 0.0020022055347307657,
+        "out_of_range_rate": 0.0
+      },
+      "annual_income": {
+        "result": "drift",
+        "psi": 0.8659172826741732,
+        "ks_statistic": 0.37085714285714283,
+        "ks_pvalue": 7.61555603709783e-91,
+        "js_divergence": 0.0965132853323729,
+        "out_of_range_rate": 0.003
+      },
+      "debt_ratio": {
+        "result": "drift",
+        "psi": 14.34874336641209,
+        "ks_statistic": 0.773,
+        "ks_pvalue": 8.84e-322,
+        "js_divergence": 0.40745003300333715,
+        "out_of_range_rate": 0.101
+      },
+      "credit_history_years": {
+        "result": "stable",
+        "psi": 0.006877370375987378,
+        "ks_statistic": 0.025857142857142856,
+        "ks_pvalue": 0.6973703235264161,
+        "js_divergence": 0.0008592051626637371,
+        "out_of_range_rate": 0.0
+      },
+      "open_accounts": {
+        "result": "stable",
+        "psi": 0.010696348827874631,
+        "ks_statistic": 0.04257142857142857,
+        "ks_pvalue": 0.13423427640536137,
+        "js_divergence": 0.001336098757274742,
+        "out_of_range_rate": 0.0
+      },
+      "delinquencies_2y": {
+        "result": "drift",
+        "psi": 0.7354461824975951,
+        "ks_statistic": 0.40135714285714286,
+        "ks_pvalue": 8.104775569628308e-107,
+        "js_divergence": 0.08844907203004454,
+        "out_of_range_rate": 0.016
+      },
+      "employment_years": {
+        "result": "stable",
+        "psi": 0.012186734461007738,
+        "ks_statistic": 0.02942857142857143,
+        "ks_pvalue": 0.5355960940112077,
+        "js_divergence": 0.0015214268459943104,
+        "out_of_range_rate": 0.001
+      },
+      "loan_amount": {
+        "result": "stable",
+        "psi": 0.021479414789339218,
+        "ks_statistic": 0.029785714285714287,
+        "ks_pvalue": 0.5199990307811376,
+        "js_divergence": 0.002679636318831684,
+        "out_of_range_rate": 0.0
+      },
+      "housing": {
+        "result": "drift",
+        "psi": 0.636185074895306
+      },
+      "loan_purpose": {
+        "result": "stable",
+        "psi": 0.008943232711807967
+      }
+    }
+  },
+  "champion": {
+    "validation": {
+      "samples": 600,
+      "accuracy": 0.8666666666666667,
+      "precision": 0.8192771084337349,
+      "recall": 0.5112781954887218,
+      "f1": 0.6296296296296297,
+      "roc_auc": 0.8906312891436299,
+      "brier": 0.09841572414415352
+    },
+    "new_batch_window": {
+      "samples": 1000,
+      "accuracy": 0.821,
+      "precision": 0.8490284005979073,
+      "recall": 0.8792569659442725,
+      "f1": 0.8638783269961977,
+      "roc_auc": 0.8907531790593133,
+      "brier": 0.1274199705756241
+    },
+    "registry": {
+      "registry_version": "1",
+      "alias": "champion",
+      "new": false
+    },
+    "holdout": {
+      "samples": 1000,
+      "accuracy": 0.797,
+      "precision": 0.8362068965517241,
+      "recall": 0.8673621460506706,
+      "f1": 0.8514996342355523,
+      "roc_auc": 0.8723449553585583,
+      "brier": 0.13551428096371293
+    },
+    "reference_test": {
+      "samples": 600,
+      "accuracy": 0.8716666666666667,
+      "precision": 0.7692307692307693,
+      "recall": 0.6015037593984962,
+      "f1": 0.6751054852320675,
+      "roc_auc": 0.9096134340132987,
+      "brier": 0.09049754815292953
+    }
+  },
+  "decision": {
+    "retrain": true,
+    "reasons": [
+      "4 features drifted: annual_income, debt_ratio, delinquencies_2y, housing"
+    ],
+    "champion_auc_drop": -0.00012188991568340413
+  },
+  "candidate": {
+    "train_rows": 3800,
+    "artifact_sha256": "efd41bf826d3076c9151a084810a262ad251c07b5e592017c0bdc9f84b159812",
+    "holdout": {
+      "samples": 1000,
+      "accuracy": 0.803,
+      "precision": 0.8434782608695652,
+      "recall": 0.8673621460506706,
+      "f1": 0.855253490080823,
+      "roc_auc": 0.87335963652671,
+      "brier": 0.13510427145065795
+    },
+    "reference_test": {
+      "samples": 600,
+      "accuracy": 0.875,
+      "precision": 0.7788461538461539,
+      "recall": 0.6090225563909775,
+      "f1": 0.6835443037974683,
+      "roc_auc": 0.9103862439825474,
+      "brier": 0.09031050902916984
+    }
+  },
+  "gates": [
+    {
+      "gate": "data_quality",
+      "passed": true,
+      "summary": "Dataset matches the feature contract."
+    },
+    {
+      "gate": "evaluation",
+      "passed": true,
+      "summary": "Validation metrics meet absolute thresholds."
+    },
+    {
+      "gate": "baseline",
+      "passed": true,
+      "summary": "Candidate stayed within the allowed regression against the champion test set."
+    },
+    {
+      "gate": "integrity",
+      "passed": true,
+      "summary": "Artifact loaded and the feature schema matches this build."
+    },
+    {
+      "gate": "smoke",
+      "passed": true,
+      "summary": "Known profiles scored with finite probabilities and the expected risk ordering."
+    }
+  ],
+  "gates_passed": true,
+  "outcome": "candidate_registered",
+  "mlflow": {
+    "run_id": "9b71d91c2aec46bbbab7412d7e07360f",
+    "registry_version": "2",
+    "alias": "candidate"
+  }
+}

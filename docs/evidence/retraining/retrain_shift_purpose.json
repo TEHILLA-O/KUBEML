@@ -1,0 +1,136 @@
+{
+  "generated_at": "2026-11-24T15:27:49+00:00",
+  "batch": {
+    "scenario": "shift_purpose",
+    "rows": 2000,
+    "seed": 101,
+    "window_rows": 1000,
+    "holdout_rows": 1000,
+    "fingerprint": "4778813768af575cde490dcbdd0351acbb7e26e7cdcce15d71cb604c1bd2cf7e"
+  },
+  "policy": {
+    "min_drifted_features": 2,
+    "max_auc_drop": 0.03,
+    "window_share": 0.5
+  },
+  "drift": {
+    "result": "drift",
+    "drifted_features": [
+      "loan_purpose"
+    ],
+    "per_feature": {
+      "age": {
+        "result": "stable",
+        "psi": 0.016042387666428563,
+        "ks_statistic": 0.03692857142857143,
+        "ks_pvalue": 0.2605864606758182,
+        "js_divergence": 0.0020022055347307657,
+        "out_of_range_rate": 0.0
+      },
+      "annual_income": {
+        "result": "stable",
+        "psi": 0.009621878204465268,
+        "ks_statistic": 0.029214285714285713,
+        "ks_pvalue": 0.5450377231158716,
+        "js_divergence": 0.0012013353266255799,
+        "out_of_range_rate": 0.0
+      },
+      "debt_ratio": {
+        "result": "stable",
+        "psi": 0.006273802203147622,
+        "ks_statistic": 0.024785714285714286,
+        "ks_pvalue": 0.7454994694820087,
+        "js_divergence": 0.0007838302588759078,
+        "out_of_range_rate": 0.0
+      },
+      "credit_history_years": {
+        "result": "stable",
+        "psi": 0.006877370375987378,
+        "ks_statistic": 0.025857142857142856,
+        "ks_pvalue": 0.6973703235264161,
+        "js_divergence": 0.0008592051626637371,
+        "out_of_range_rate": 0.0
+      },
+      "open_accounts": {
+        "result": "stable",
+        "psi": 0.010696348827874631,
+        "ks_statistic": 0.04257142857142857,
+        "ks_pvalue": 0.13423427640536137,
+        "js_divergence": 0.001336098757274742,
+        "out_of_range_rate": 0.0
+      },
+      "delinquencies_2y": {
+        "result": "stable",
+        "psi": 0.003093605247321936,
+        "ks_statistic": 0.019642857142857142,
+        "ks_pvalue": 0.9328920262927051,
+        "js_divergence": 0.00038652314110221997,
+        "out_of_range_rate": 0.0
+      },
+      "employment_years": {
+        "result": "stable",
+        "psi": 0.012186734461007738,
+        "ks_statistic": 0.02942857142857143,
+        "ks_pvalue": 0.5355960940112077,
+        "js_divergence": 0.0015214268459943104,
+        "out_of_range_rate": 0.001
+      },
+      "loan_amount": {
+        "result": "stable",
+        "psi": 0.021479414789339218,
+        "ks_statistic": 0.029785714285714287,
+        "ks_pvalue": 0.5199990307811376,
+        "js_divergence": 0.002679636318831684,
+        "out_of_range_rate": 0.0
+      },
+      "housing": {
+        "result": "stable",
+        "psi": 0.002482347835197371
+      },
+      "loan_purpose": {
+        "result": "drift",
+        "psi": 1.5842135394621835
+      }
+    }
+  },
+  "champion": {
+    "validation": {
+      "samples": 600,
+      "accuracy": 0.8666666666666667,
+      "precision": 0.8192771084337349,
+      "recall": 0.5112781954887218,
+      "f1": 0.6296296296296297,
+      "roc_auc": 0.8906312891436299,
+      "brier": 0.09841572414415352
+    },
+    "new_batch_window": {
+      "samples": 1000,
+      "accuracy": 0.883,
+      "precision": 0.7891156462585034,
+      "recall": 0.5742574257425742,
+      "f1": 0.664756446991404,
+      "roc_auc": 0.9039554331372986,
+      "brier": 0.08642147716243558
+    },
+    "registry": {
+      "registry_version": "1",
+      "alias": "champion",
+      "new": false
+    },
+    "holdout": {
+      "samples": 1000,
+      "accuracy": 0.882,
+      "precision": 0.8035714285714286,
+      "recall": 0.6136363636363636,
+      "f1": 0.6958762886597938,
+      "roc_auc": 0.8951981351981352,
+      "brier": 0.0898664260833422
+    }
+  },
+  "decision": {
+    "retrain": false,
+    "reasons": [],
+    "champion_auc_drop": -0.013324143993668769
+  },
+  "outcome": "no_retrain"
+}

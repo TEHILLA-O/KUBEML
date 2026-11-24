@@ -10,6 +10,7 @@ A local first model operations platform for ML engineers who want to see the who
 - Serves predictions from a pinned JSON artifact, either in process or through a separate serving service.
 - Routes canary traffic with a deterministic weight counter, and only raises the weight once there is enough evidence on errors, latency and validity.
 - Opens a drift investigation when features drift. Drift cannot be configured as an automatic rollback trigger.
+- Retrains on drift or a performance drop and registers the result as a `candidate` version for review ([details](#drift-triggered-retraining)).
 - Rolls back idempotently to the stable model and smoke tests it.
 - Ships a React control room (mission, registry, releases, drift, reliability, cluster, policy, timeline), Compose files for PostgreSQL, MinIO, MLflow, Prometheus, Alertmanager and Grafana, a Helm chart, a kind script and an optional Terraform EKS path.
 
@@ -113,12 +114,43 @@ curl -X POST localhost:8080/api/v1/gateway/predict \
 
 Get `$TOKEN` from `POST /api/v1/auth/login` with `{"username":"engineer","password":"kubeml-local"}` (the response field is `token`). A feature value outside the contract, such as an unknown `loan_purpose`, returns `{"error":"Inference failed: error."}` with status 422. The allowed values are listed at `GET /api/v1/contract`.
 
+## Drift-triggered retraining
+
+`kubeml-retrain` (`src/kubeml/retrain.py`) closes the loop between drift monitoring and the registry:
+
+1. Rebuilds the champion from the fixed reference split and registers it once in MLflow with the `champion` alias.
+2. Takes a new labelled batch, uses the first half as the monitoring window and keeps the second half as a holdout neither model trains on.
+3. Runs PSI, KS and JS drift checks against the champion's training data and scores the champion on the window.
+4. Retrains only if at least 2 features drift or the champion's ROC AUC drops by more than 0.03 against its validation score.
+5. Retrains on the reference training rows plus the window, runs the same five release gates, logs the run to the `kubeml-retraining` MLflow experiment and registers a new model version with the `candidate` alias. Promotion to champion still goes through the release flow. Nothing is promoted automatically.
+
+`.github/workflows/retrain.yml` runs the job on demand (pick the scenario and batch size) and on the 1st of each month, writes a summary to the run page and uploads the report and MLflow store as an artifact.
+
+Local runs on 24 November 2026 (CPU, 2,000 row batches, batch seed 101, fresh data directory, run in this order). Reports are in [docs/evidence/retraining](docs/evidence/retraining):
+
+| Batch | Drifted features (PSI) | Champion AUC drop on window | Decision | Holdout ROC AUC, champion vs candidate | Registry |
+| --- | --- | --- | --- | --- | --- |
+| `reference` | none (all PSI under 0.03) | 0.017 | No retrain | 0.901, no candidate | v1 `champion` |
+| `shift_purpose` | `loan_purpose` (1.58) | -0.013 | No retrain: 1 feature is under the 2 feature rule | 0.895, no candidate | unchanged |
+| `drifted` | `debt_ratio` (14.35), `annual_income` (0.87), `delinquencies_2y` (0.74), `housing` (0.64) | -0.0001 | Retrain, all 5 gates passed | 0.8723 vs 0.8734 | v2 `candidate` |
+
+What this shows honestly: the synthetic drift moves the inputs but not the rule that turns inputs into defaults, so the champion barely loses ranking quality and retraining only adds about 0.001 ROC AUC on the holdout. The trigger, gating and versioning work. The size of the gain would depend on real concept drift, which this data does not contain.
+
+Reproduce:
+
+```bash
+for s in reference shift_purpose drifted; do
+  KUBEML_DATA_DIR=/tmp/kdata .venv/bin/kubeml-retrain --scenario $s --rows 2000 --batch-seed 101 \
+    --report docs/evidence/retraining/retrain_$s.json
+done
+```
+
 ## Checks
 
 | Check | Result on 1 November 2026 |
 | --- | --- |
 | `ruff check src tests` and `ruff format --check` | Clean |
-| `pytest` | 13 passed (19 deprecation warnings from MLflow) |
+| `pytest` | 13 passed (19 deprecation warnings from MLflow). 18 passed on 24 November 2026 after adding the retraining tests |
 | `frontend`: `npm run typecheck`, `npm test`, `npm run build` | Pass, 5 Vitest tests |
 | Platform start, login, models, contract, predict | Worked as shown above |
 | Compose stack, kind cluster, Helm, Terraform, Playwright | Not run in this check |
@@ -144,6 +176,7 @@ src/kubeml/
   platform/app.py   FastAPI control plane (auth, runs, registry, releases, drift, incidents)
   serving/app.py    Standalone inference service
   training.py       Training job and artifact writer
+  retrain.py        Drift check, retraining trigger and candidate registration
   dataset.py        Synthetic credit risk data
   gates.py          Promotion gates
   releases.py       Canary and rollback logic

@@ -37,6 +37,7 @@ dev = [
 kubeml-platform = "kubeml.platform.app:main"
 kubeml-serving = "kubeml.serving.app:main"
 kubeml-train = "kubeml.training:main"
+kubeml-retrain = "kubeml.retrain:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
