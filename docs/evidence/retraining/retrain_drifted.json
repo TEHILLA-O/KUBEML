@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-24T15:27:43+00:00",
+  "generated_at": "2026-11-24T16:45:58+00:00",
   "batch": {
     "scenario": "drifted",
     "rows": 2000,
@@ -198,7 +198,7 @@
   "gates_passed": true,
   "outcome": "candidate_registered",
   "mlflow": {
-    "run_id": "9b71d91c2aec46bbbab7412d7e07360f",
+    "run_id": "4a0294caa36346c180dfb06bcc16139e",
     "registry_version": "2",
     "alias": "candidate"
   }

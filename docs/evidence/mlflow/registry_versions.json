@@ -1,0 +1,24 @@
+[
+  {
+    "model": "credit-risk",
+    "version": 1,
+    "aliases": [
+      "champion"
+    ],
+    "run_id": "4b01c137653c40c2ab15b9ebea695e6d",
+    "experiment": "kubeml-credit-risk",
+    "artifact_sha256": "cf88ed9836004fedeb011e08b99862382489298893d163a99cf1ba2fbf926eb9",
+    "dataset_or_batch_fingerprint": "b2d930d08b5cd5ddc7499eb4e91c0a80c0d2d40bfe61cae78c494bddf52adba3"
+  },
+  {
+    "model": "credit-risk",
+    "version": 2,
+    "aliases": [
+      "candidate"
+    ],
+    "run_id": "4a0294caa36346c180dfb06bcc16139e",
+    "experiment": "kubeml-retraining",
+    "artifact_sha256": "efd41bf826d3076c9151a084810a262ad251c07b5e592017c0bdc9f84b159812",
+    "dataset_or_batch_fingerprint": "c25014bdf8e824c9569998c041a8c45e63ad737ad0c5834bcde0d16f8cd827e6"
+  }
+]

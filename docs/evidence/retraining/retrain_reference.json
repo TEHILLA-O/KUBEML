@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-24T15:27:40+00:00",
+  "generated_at": "2026-11-24T16:45:53+00:00",
   "batch": {
     "scenario": "reference",
     "rows": 2000,
@@ -111,7 +111,7 @@
       "brier": 0.09446037668522081
     },
     "registry": {
-      "run_id": "c3f968c038494d0c881551284149e143",
+      "run_id": "4b01c137653c40c2ab15b9ebea695e6d",
       "registry_version": "1",
       "alias": "champion",
       "new": true
@@ -131,5 +131,10 @@
     "reasons": [],
     "champion_auc_drop": 0.017358358654461892
   },
-  "outcome": "no_retrain"
+  "outcome": "no_retrain",
+  "mlflow": {
+    "run_id": "d905abd618e8462a8270a19f18349122",
+    "registry_version": null,
+    "alias": null
+  }
 }

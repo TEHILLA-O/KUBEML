@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-24T15:27:49+00:00",
+  "generated_at": "2026-11-24T16:45:55+00:00",
   "batch": {
     "scenario": "shift_purpose",
     "rows": 2000,
@@ -132,5 +132,10 @@
     "reasons": [],
     "champion_auc_drop": -0.013324143993668769
   },
-  "outcome": "no_retrain"
+  "outcome": "no_retrain",
+  "mlflow": {
+    "run_id": "8ce643bc2ec847a88dc09ba98ea8a4c9",
+    "registry_version": null,
+    "alias": null
+  }
 }

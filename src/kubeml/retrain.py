@@ -64,6 +64,47 @@ def decide(
     return {"retrain": bool(reasons), "reasons": reasons, "champion_auc_drop": auc_drop}
 
 
+def _drift_metrics(report: dict[str, Any]) -> dict[str, float]:
+    out = {}
+    for feature, values in report["drift"]["per_feature"].items():
+        for key in ("psi", "ks_statistic", "js_divergence"):
+            if isinstance(values.get(key), float):
+                out[f"drift_{feature}_{key}"] = values[key]
+    out["drifted_feature_count"] = float(len(report["drift"]["drifted_features"]))
+    if report["decision"]["champion_auc_drop"] is not None:
+        out["champion_auc_drop"] = float(report["decision"]["champion_auc_drop"])
+    return out
+
+
+def _log_check(settings: Settings, report: dict[str, Any]) -> dict[str, Any]:
+    """Log a drift check that did not trigger retraining, so every check is tracked."""
+    import mlflow
+
+    mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
+    mlflow.set_experiment("kubeml-retraining")
+    with mlflow.start_run(run_name=f"check-{report['batch']['scenario']}") as run:
+        mlflow.log_params(
+            {
+                "scenario": report["batch"]["scenario"],
+                "batch_rows": report["batch"]["rows"],
+                "batch_seed": report["batch"]["seed"],
+                **{f"policy_{k}": v for k, v in RETRAIN_POLICY.items()},
+            }
+        )
+        mlflow.set_tag("outcome", report["outcome"])
+        mlflow.set_tag("batch_fingerprint", report["batch"]["fingerprint"])
+        mlflow.log_metrics(_drift_metrics(report))
+        mlflow.log_metrics(
+            {
+                f"champion_holdout_{k}": float(v)
+                for k, v in report["champion"]["holdout"].items()
+                if isinstance(v, float)
+            }
+        )
+        mlflow.log_dict(report, "retraining_report.json")
+        return {"run_id": run.info.run_id, "registry_version": None, "alias": None}
+
+
 def _log_mlflow(settings: Settings, report: dict[str, Any], artifact: Path) -> dict[str, Any]:
     import mlflow
     from mlflow.tracking import MlflowClient
@@ -83,6 +124,8 @@ def _log_mlflow(settings: Settings, report: dict[str, Any], artifact: Path) -> d
             }
         )
         mlflow.set_tag("trigger_reasons", "; ".join(report["decision"]["reasons"]))
+        mlflow.set_tag("outcome", report["outcome"])
+        mlflow.log_metrics(_drift_metrics(report))
         mlflow.set_tag("artifact_sha256", report["candidate"]["artifact_sha256"])
         mlflow.set_tag("batch_fingerprint", report["batch"]["fingerprint"])
         for prefix, metrics in (
@@ -196,6 +239,8 @@ def run_retraining(
     if not decision["retrain"]:
         report["champion"]["holdout"] = _headline(champion.evaluate(holdout_x, holdout_y))
         report["outcome"] = "no_retrain"
+        if log_to_mlflow:
+            report["mlflow"] = _log_check(settings, report)
         return report
 
     train_frame = pd.concat([split.train, window], ignore_index=True).dropna()

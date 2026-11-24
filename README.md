@@ -10,7 +10,7 @@ A local first model operations platform for ML engineers who want to see the who
 - Serves predictions from a pinned JSON artifact, either in process or through a separate serving service.
 - Routes canary traffic with a deterministic weight counter, and only raises the weight once there is enough evidence on errors, latency and validity.
 - Opens a drift investigation when features drift. Drift cannot be configured as an automatic rollback trigger.
-- Retrains on drift or a performance drop and registers the result as a `candidate` version for review ([details](#drift-triggered-retraining), [model card](MODEL_CARD.md)).
+- Retrains on drift or a performance drop and registers the result as a `candidate` version for review ([details](#mlops-evidence-experiment-tracking-model-versioning-drift-detection-and-automated-retraining), [model card](MODEL_CARD.md)).
 - Rolls back idempotently to the stable model and smoke tests it.
 - Ships a React control room (mission, registry, releases, drift, reliability, cluster, policy, timeline), Compose files for PostgreSQL, MinIO, MLflow, Prometheus, Alertmanager and Grafana, a Helm chart, a kind script and an optional Terraform EKS path.
 
@@ -114,7 +114,33 @@ curl -X POST localhost:8080/api/v1/gateway/predict \
 
 Get `$TOKEN` from `POST /api/v1/auth/login` with `{"username":"engineer","password":"kubeml-local"}` (the response field is `token`). A feature value outside the contract, such as an unknown `loan_purpose`, returns `{"error":"Inference failed: error."}` with status 422. The allowed values are listed at `GET /api/v1/contract`.
 
-## Drift-triggered retraining
+## MLOps evidence: experiment tracking, model versioning, drift detection and automated retraining
+
+### Experiment tracking (MLflow)
+
+Every training run and every drift check is logged to MLflow with its parameters, metrics, tags (dataset or batch fingerprint, artifact SHA256, trigger reasons, outcome) and a JSON report artifact. The local MLflow store is not committed, so `scripts/export_mlflow_evidence.py` exports it: [docs/evidence/mlflow/runs.csv](docs/evidence/mlflow/runs.csv) has all 80 logged params and metrics for each run below. These are the runs from the local session on 24 November 2026 (CPU):
+
+| Run | Experiment | Outcome | Batch | Drifted features | Champion ROC AUC | Candidate ROC AUC |
+| --- | --- | --- | --- | --- | --- | --- |
+| `4b01c137` | kubeml-credit-risk | champion training run | reference split | n/a | 0.8906 (validation) | n/a |
+| `d905abd6` | kubeml-retraining | no_retrain | `reference` | 0 | 0.9013 (holdout) | n/a |
+| `8ce643bc` | kubeml-retraining | no_retrain | `shift_purpose` | 1 | 0.8952 (holdout) | n/a |
+| `4a0294ca` | kubeml-retraining | candidate_registered | `drifted` | 4 | 0.8723 (holdout) | 0.8734 |
+
+Open the same runs in the MLflow UI with `mlflow ui --backend-store-uri /tmp/kdata/mlruns` after running the commands at the end of this section.
+
+### Model versioning (MLflow registry)
+
+[docs/evidence/mlflow/registry_versions.json](docs/evidence/mlflow/registry_versions.json):
+
+| Version | Alias | Logged by run | Artifact SHA256 (first 12) | Data fingerprint (first 12) |
+| --- | --- | --- | --- | --- |
+| 1 | `champion` | `4b01c137` (kubeml-credit-risk) | `cf88ed983600` | `b2d930d08b5c` |
+| 2 | `candidate` | `4a0294ca` (kubeml-retraining) | `efd41bf826d3` | `c25014bdf8e8` |
+
+The champion keeps its alias. The retrained model gets a new version with the `candidate` alias and waits for the release flow; nothing is promoted automatically.
+
+### Drift detection and automated retraining
 
 `kubeml-retrain` (`src/kubeml/retrain.py`) closes the loop between drift monitoring and the registry:
 
@@ -136,13 +162,15 @@ Local runs on 24 November 2026 (CPU, 2,000 row batches, batch seed 101, fresh da
 
 What this shows honestly: the synthetic drift moves the inputs but not the rule that turns inputs into defaults, so the champion barely loses ranking quality and retraining only adds about 0.001 ROC AUC on the holdout. The trigger, gating and versioning work. The size of the gain would depend on real concept drift, which this data does not contain.
 
-Reproduce:
+Reproduce everything in this section:
 
 ```bash
+rm -rf /tmp/kdata
 for s in reference shift_purpose drifted; do
   KUBEML_DATA_DIR=/tmp/kdata .venv/bin/kubeml-retrain --scenario $s --rows 2000 --batch-seed 101 \
     --report docs/evidence/retraining/retrain_$s.json
 done
+KUBEML_DATA_DIR=/tmp/kdata .venv/bin/python scripts/export_mlflow_evidence.py --out docs/evidence/mlflow
 ```
 
 ## Fairness and subgroup audit
@@ -166,7 +194,7 @@ KUBEML_DATA_DIR=/tmp/kfair .venv/bin/python scripts/fairness_report.py --rows 20
 | Check | Result on 1 November 2026 |
 | --- | --- |
 | `ruff check src tests` and `ruff format --check` | Clean |
-| `pytest` | 13 passed (19 deprecation warnings from MLflow). 18 passed on 24 November 2026 after adding the retraining tests |
+| `pytest` | 13 passed (19 deprecation warnings from MLflow). 19 passed on 24 November 2026 after adding the retraining tests |
 | `frontend`: `npm run typecheck`, `npm test`, `npm run build` | Pass, 5 Vitest tests |
 | Platform start, login, models, contract, predict | Worked as shown above |
 | Compose stack, kind cluster, Helm, Terraform, Playwright | Not run in this check |

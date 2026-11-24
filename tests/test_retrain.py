@@ -43,3 +43,12 @@ def test_drifted_batch_retrains_and_registers_candidate(tmp_path, monkeypatch):
     assert int(report["mlflow"]["registry_version"]) > int(
         report["champion"]["registry"]["registry_version"]
     )
+
+
+def test_every_drift_check_is_tracked_in_mlflow(tmp_path, monkeypatch):
+    monkeypatch.setenv("KUBEML_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("MLFLOW_TRACKING_URI", (tmp_path / "mlruns").as_uri())
+    report = run_retraining(get_settings(), "reference", 1000, 101, log_to_mlflow=True)
+    assert report["outcome"] == "no_retrain"
+    assert report["mlflow"]["run_id"]
+    assert report["mlflow"]["registry_version"] is None
