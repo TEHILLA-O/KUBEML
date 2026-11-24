@@ -10,7 +10,7 @@ A local first model operations platform for ML engineers who want to see the who
 - Serves predictions from a pinned JSON artifact, either in process or through a separate serving service.
 - Routes canary traffic with a deterministic weight counter, and only raises the weight once there is enough evidence on errors, latency and validity.
 - Opens a drift investigation when features drift. Drift cannot be configured as an automatic rollback trigger.
-- Retrains on drift or a performance drop and registers the result as a `candidate` version for review ([details](#drift-triggered-retraining)).
+- Retrains on drift or a performance drop and registers the result as a `candidate` version for review ([details](#drift-triggered-retraining), [model card](MODEL_CARD.md)).
 - Rolls back idempotently to the stable model and smoke tests it.
 - Ships a React control room (mission, registry, releases, drift, reliability, cluster, policy, timeline), Compose files for PostgreSQL, MinIO, MLflow, Prometheus, Alertmanager and Grafana, a Helm chart, a kind script and an optional Terraform EKS path.
 
