@@ -124,7 +124,7 @@ Get `$TOKEN` from `POST /api/v1/auth/login` with `{"username":"engineer","passwo
 4. Retrains only if at least 2 features drift or the champion's ROC AUC drops by more than 0.03 against its validation score.
 5. Retrains on the reference training rows plus the window, runs the same five release gates, logs the run to the `kubeml-retraining` MLflow experiment and registers a new model version with the `candidate` alias. Promotion to champion still goes through the release flow. Nothing is promoted automatically.
 
-`.github/workflows/retrain.yml` runs the job on demand (pick the scenario and batch size) and on the 1st of each month, writes a summary to the run page and uploads the report and MLflow store as an artifact.
+The job is one command with a JSON report, so it can run from cron or a scheduled CI job. The retraining tests in `tests/test_retrain.py` run in the existing CI workflow.
 
 Local runs on 24 November 2026 (CPU, 2,000 row batches, batch seed 101, fresh data directory, run in this order). Reports are in [docs/evidence/retraining](docs/evidence/retraining):
 
