@@ -118,7 +118,7 @@ Get `$TOKEN` from `POST /api/v1/auth/login` with `{"username":"engineer","passwo
 
 ### Experiment tracking (MLflow)
 
-Every training run and every drift check is logged to MLflow with its parameters, metrics, tags (dataset or batch fingerprint, artifact SHA256, trigger reasons, outcome) and a JSON report artifact. The local MLflow store is not committed, so `scripts/export_mlflow_evidence.py` exports it: [docs/evidence/mlflow/runs.csv](docs/evidence/mlflow/runs.csv) has all 80 logged params and metrics for each run below. These are the runs from the local session on 24 November 2026 (CPU):
+Every training run and every drift check is logged to MLflow with its parameters, metrics, tags (dataset or batch fingerprint, artifact SHA256, trigger reasons, outcome) and a JSON report artifact. The local MLflow store is not committed, so `scripts/export_mlflow_evidence.py` exports it: [docs/evidence/mlflow/runs.csv](docs/evidence/mlflow/runs.csv) has every logged param, metric and tag (80 columns) for each run below. These are the runs from the local session on 24 November 2026 (CPU):
 
 | Run | Experiment | Outcome | Batch | Drifted features | Champion ROC AUC | Candidate ROC AUC |
 | --- | --- | --- | --- | --- | --- | --- |
