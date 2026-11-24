@@ -145,6 +145,22 @@ for s in reference shift_purpose drifted; do
 done
 ```
 
+## Fairness and subgroup audit
+
+`scripts/fairness_report.py` scores 20,000 fresh synthetic applicants (seed 2024) with the champion and compares groups at the 0.5 threshold. Age is a protected characteristic under the UK Equality Act 2010, and the generator gives older applicants slightly lower default risk. Run on 24 November 2026; full output in [docs/evidence/fairness/fairness_report.json](docs/evidence/fairness/fairness_report.json).
+
+| Scoring | Demographic parity difference | Disparate impact ratio | Equal opportunity difference | Equalized odds difference | Calibration gap spread |
+| --- | --- | --- | --- | --- | --- |
+| Champion, by age band | 0.046 | 0.75 | 0.012 | 0.017 | 0.001 |
+| Same model, age fixed at 45 for everyone | 0.009 | 0.94 | 0.110 | 0.110 | 0.065 |
+| Champion, by housing | 0.071 | 0.61 | 0.025 | 0.025 | 0.003 |
+
+By age band the champion flags 22 to 34 year olds at 18.2% and 50 to 73 year olds at 13.6%, a ratio of 0.75, below the common 0.8 rule of thumb. True positive rates (0.567 vs 0.555) and calibration are almost equal, so the gap follows the real difference in default rates (0.249 vs 0.191). Removing age's effect closes the flagging gap (ratio 0.94) but opens a 0.11 gap in true positive rate and makes scores miscalibrated by age (-0.034 for the youngest band, +0.031 for the oldest). That is the usual trade off between parity and calibration, and which one matters is a policy decision, not a modelling one.
+
+```bash
+KUBEML_DATA_DIR=/tmp/kfair .venv/bin/python scripts/fairness_report.py --rows 20000 --seed 2024
+```
+
 ## Checks
 
 | Check | Result on 1 November 2026 |

@@ -26,4 +26,4 @@ Metrics are also broken down by `housing` and `loan_purpose` segment in each run
 
 - The data is synthetic, so these numbers say nothing about real lending.
 - The synthetic drift scenarios change the inputs but not the rule that links inputs to defaults, so retraining gains are small (about 0.001 ROC AUC on the drifted holdout).
-- `housing` and `loan_purpose` are the only segments. There are no protected attributes, so no fairness analysis is possible.
+- Age is the only protected attribute in the data. The fairness audit in the README shows a 0.75 disparate impact ratio by age band that follows real base rate differences, with equal true positive rates and calibration across bands.

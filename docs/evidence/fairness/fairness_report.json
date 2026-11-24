@@ -1,0 +1,146 @@
+{
+  "rows": 20000,
+  "seed": 2024,
+  "threshold": 0.5,
+  "overall": {
+    "rows": 20000,
+    "default_rate": 0.216,
+    "flagged_rate": 0.15515,
+    "true_positive_rate": 0.5608796296296297,
+    "false_positive_rate": 0.04336734693877551,
+    "precision": 0.7808572349339349,
+    "roc_auc": 0.8943955055980726,
+    "mean_score": 0.21781501429609954,
+    "calibration_gap": 0.0018150142960995375
+  },
+  "age_band": {
+    "groups": {
+      "22-34": {
+        "rows": 5037,
+        "default_rate": 0.24895771292435973,
+        "flagged_rate": 0.1816557474687314,
+        "true_positive_rate": 0.5669856459330144,
+        "false_positive_rate": 0.05392545598731166,
+        "precision": 0.7770491803278688,
+        "roc_auc": 0.8845565720226599,
+        "mean_score": 0.25074260164222434,
+        "calibration_gap": 0.0017848887178646133
+      },
+      "35-49": {
+        "rows": 5710,
+        "default_rate": 0.22697022767075306,
+        "flagged_rate": 0.16304728546409808,
+        "true_positive_rate": 0.5632716049382716,
+        "false_positive_rate": 0.04553692795650204,
+        "precision": 0.7841031149301826,
+        "roc_auc": 0.890555338792954,
+        "mean_score": 0.22917799603235814,
+        "calibration_gap": 0.002207768361605078
+      },
+      "50-73": {
+        "rows": 9253,
+        "default_rate": 0.19128931157462445,
+        "flagged_rate": 0.1358478331351994,
+        "true_positive_rate": 0.5548022598870056,
+        "false_positive_rate": 0.036749966590939466,
+        "precision": 0.781225139220366,
+        "roc_auc": 0.9005925295075619,
+        "mean_score": 0.19287835773320447,
+        "calibration_gap": 0.0015890461585800209
+      }
+    },
+    "demographic_parity_difference": 0.045807914333531985,
+    "disparate_impact_ratio": 0.747831186340983,
+    "equal_opportunity_difference": 0.01218338604600877,
+    "equalized_odds_difference": 0.017175489396372194,
+    "auc_spread": 0.01603595748490194,
+    "calibration_gap_spread": 0.0006187222030250572
+  },
+  "age_band_if_age_fixed_at_45": {
+    "groups": {
+      "22-34": {
+        "rows": 5037,
+        "default_rate": 0.24895771292435973,
+        "flagged_rate": 0.15048640063529878,
+        "true_positive_rate": 0.49920255183413076,
+        "false_positive_rate": 0.034892942109436956,
+        "precision": 0.8258575197889182,
+        "roc_auc": 0.8843175272909403,
+        "mean_score": 0.21521099996815066,
+        "calibration_gap": -0.03374671295620907
+      },
+      "35-49": {
+        "rows": 5710,
+        "default_rate": 0.22697022767075306,
+        "flagged_rate": 0.15691768826619965,
+        "true_positive_rate": 0.5501543209876543,
+        "false_positive_rate": 0.04145899410965111,
+        "precision": 0.7957589285714286,
+        "roc_auc": 0.8902118399928399,
+        "mean_score": 0.223144194338481,
+        "calibration_gap": -0.0038260333322720497
+      },
+      "50-73": {
+        "rows": 9253,
+        "default_rate": 0.19128931157462445,
+        "flagged_rate": 0.15940775964552037,
+        "true_positive_rate": 0.6096045197740113,
+        "false_positive_rate": 0.052919951890952825,
+        "precision": 0.7315254237288136,
+        "roc_auc": 0.8999032081003194,
+        "mean_score": 0.22270914244979367,
+        "calibration_gap": 0.031419830875169225
+      }
+    },
+    "demographic_parity_difference": 0.008921359010221591,
+    "disparate_impact_ratio": 0.9440343492057082,
+    "equal_opportunity_difference": 0.11040196793988055,
+    "equalized_odds_difference": 0.11040196793988055,
+    "auc_spread": 0.015585680809379165,
+    "calibration_gap_spread": 0.06516654383137829
+  },
+  "housing": {
+    "groups": {
+      "mortgage": {
+        "rows": 7539,
+        "default_rate": 0.2140867489056904,
+        "flagged_rate": 0.15200955033824115,
+        "true_positive_rate": 0.5656753407682775,
+        "false_positive_rate": 0.039324894514767936,
+        "precision": 0.7966841186736475,
+        "roc_auc": 0.8971731526359544,
+        "mean_score": 0.2166315638056343,
+        "calibration_gap": 0.0025448148999439035
+      },
+      "own": {
+        "rows": 4460,
+        "default_rate": 0.1562780269058296,
+        "flagged_rate": 0.11121076233183856,
+        "true_positive_rate": 0.5408895265423243,
+        "false_positive_rate": 0.031623704491097526,
+        "precision": 0.7600806451612904,
+        "roc_auc": 0.902322355671072,
+        "mean_score": 0.1593188709014091,
+        "calibration_gap": 0.0030408439955794953
+      },
+      "rent": {
+        "rows": 8001,
+        "default_rate": 0.2510936132983377,
+        "flagged_rate": 0.18260217472815898,
+        "true_positive_rate": 0.5639621702339472,
+        "false_positive_rate": 0.05473965287049399,
+        "precision": 0.7754962354551677,
+        "roc_auc": 0.8834513713655705,
+        "mean_score": 0.2515376530647455,
+        "calibration_gap": 0.00044403976640783327
+      }
+    },
+    "demographic_parity_difference": 0.07139141239632042,
+    "disparate_impact_ratio": 0.6090330659938674,
+    "equal_opportunity_difference": 0.024785814225953273,
+    "equalized_odds_difference": 0.024785814225953273,
+    "auc_spread": 0.018870984305501493,
+    "calibration_gap_spread": 0.002596804229171662
+  },
+  "note": "Synthetic data. The generator lowers default risk by 0.02 on the logit scale per year of age."
+}
